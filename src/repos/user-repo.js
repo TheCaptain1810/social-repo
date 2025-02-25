@@ -15,29 +15,27 @@ class UserRepo {
   }
 
   static async insert(username, bio) {
-    return await pool.query(
-      "INSERT INTO users(username, bio) VALUES ($1, $2);",
+    const { rows } = await pool.query(
+      "INSERT INTO users(username, bio) VALUES ($1, $2) RETURNING *;",
       [username, bio]
     );
+    return toCamelCase(rows)[0];
   }
 
   static async update(id, username, bio) {
-    const user = pool.query("SELECT * FROM users WHERE id = $1;", [id]);
-    if (!user) {
-      return new Error("User not found");
-    }
-    return await pool.query(
-      "UPDATE users SET username = $1, bio = $2 WHERE id = $3;",
+    const { rows } = await pool.query(
+      "UPDATE users SET username = $1, bio = $2 WHERE id = $3 RETURNING *;",
       [username, bio, id]
     );
+    return toCamelCase(rows)[0];
   }
 
   static async delete(id) {
-    const user = pool.query("SELECT * FROM users WHERE id = $1;", [id]);
-    if (!user) {
-      return new Error("User not found");
-    }
-    return await pool.query("DELETE FROM users WHERE id = $1;", [id]);
+    const { rows } = await pool.query(
+      "DELETE FROM users WHERE id = $1 RETURNING *",
+      [id]
+    );
+    return toCamelCase(rows)[0];
   }
 }
 
